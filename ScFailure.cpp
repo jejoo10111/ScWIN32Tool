@@ -1,0 +1,376 @@
+#include <stdio.h>
+#include <Windows.h>
+#include <winsvc.h> //scm database handle ....
+#include <iostream>
+using namespace std;
+
+LPCWSTR NameOfService;
+SC_HANDLE hSCManager;
+SC_HANDLE hService;
+
+CHAR reset[100] = "";
+CHAR reboot[100] = "";
+CHAR action[100] = "";
+CHAR command[100] = "";
+
+//sc [<ServerName>] failure [<ServiceName>] [reset= <ErrorFreePeriod>] [reboot= <BroadcastMessage>] [command= <CommandLine>] [actions= {"" | {[run/<MS>] | [restart/<MS>] | [reboot/<MS>]}[/...]]
+
+//https://microsoft.github.io/windows-docs-rs/doc/windows/Win32/System/Services/struct.SERVICE_FAILURE_ACTIONSW.html
+
+void FailureCall()
+{
+    printf("\nDESCRIPTION:\n\tChanges the actions upon failure.\n");
+    printf("\n\tUSAGE:\n\tsc <server> failure [service name] <option1> <option2>...\n");
+    printf("\n\tOPTIONS:\n");
+    printf("\treset=  <Length of period of no failures (in seconds) after which to reset the failure count to 0 (may be INFINITE) > (Must be used in conjunction with actions = )\n");
+    printf("\t reboot=  <Message broadcast before rebooting on failure>\n");
+    printf("\tcommand= <Command line to be run on failure>\n");
+    printf("\tactions=  <Failure actions and their delay time (in milliseconds), separated by / (forward slash) --e.g., run / 5000 / reboot / 800 Valid actions are <run | restart | reboot> > (Must be used in conjunction with the reset = option)\n");
+}
+
+//https://learn.microsoft.com/en-us/windows/win32/api/winsvc/ns-winsvc-service_failure_actionsa
+
+/*typedef struct _SERVICE_FAILURE_ACTIONSA {
+  DWORD     dwResetPeriod;
+  LPSTR     lpRebootMsg;
+  LPSTR     lpCommand;
+  DWORD     cActions;
+  SC_ACTION *lpsaActions;
+} SERVICE_FAILURE_ACTIONSA, *LPSERVICE_FAILURE_ACTIONSA;*/
+
+VOID __stdcall scFAIL()
+{
+    // Get a handle to the SCM database. 
+
+    LPSERVICE_FAILURE_ACTIONS lpsd = NULL;
+    DWORD dwBytesNeeded, cbBufSize, dwError;
+
+    hSCManager = OpenSCManager(
+        NULL,                    // local computer
+        NULL,                    // ServicesActive database 
+        SC_MANAGER_ALL_ACCESS);  // full access rights 
+
+    if (NULL == hSCManager)
+    {
+        printf("OpenSCManager failed (%d)\n", GetLastError());
+        return;
+    }
+
+    //open a servuce
+    hService = OpenService(
+        hSCManager,          // SCM database 
+        NameOfService,             // name of service 
+        SERVICE_QUERY_CONFIG); // need query config access 
+
+    if (hService == NULL)
+    {
+        printf("OpenService failed (%d)\n", GetLastError());
+        CloseServiceHandle(hSCManager);
+        return;
+    }
+
+    // Get the configuration information.
+    /*This function is called initially with NULL and 0 for the lpBuffer and cbBufSize parameters, respectively.
+    This is a common technique to query the size of the buffer needed to hold the service configuration information.
+    Since the buffer size (cbBufSize) is zero, the function is expected to fail with ERROR_INSUFFICIENT_BUFFER,
+    and GetLastError() should return this value, indicating how much memory needs to be allocated.
+
+    If GetLastError() returns ERROR_INSUFFICIENT_BUFFER, the code proceeds to allocate a buffer of the
+    required size (dwBytesNeeded) to hold the service failure actions configuration. This buffer is
+    pointed to by lpsd, which is cast to a LPSERVICE_FAILURE_ACTIONS pointer.
+
+    If any other error is encountered, it prints an error message indicating that
+    QueryServiceConfig2 failed, along with the error code. It then cleans up by closing
+    the open service and service control manager handles and presumably exits the error
+    path of the function or block.
+    */
+
+    if (!QueryServiceConfig2(
+        hService,
+        SERVICE_CONFIG_FAILURE_ACTIONS,
+        NULL,
+        0,
+        &dwBytesNeeded))
+    {
+        dwError = GetLastError();
+        if (ERROR_INSUFFICIENT_BUFFER == dwError)
+        {
+            cbBufSize = dwBytesNeeded;
+            lpsd = (LPSERVICE_FAILURE_ACTIONS)LocalAlloc(LMEM_FIXED, cbBufSize);
+        }
+        else
+        {
+            printf("QueryServiceConfig failed (%d)", dwError);
+            CloseServiceHandle(hService);
+            CloseServiceHandle(hSCManager);
+        }
+    }
+
+    if (!QueryServiceConfig2(
+        hService,
+        SERVICE_CONFIG_FAILURE_ACTIONS,
+        (LPBYTE)lpsd,
+        cbBufSize,
+        &dwBytesNeeded))
+    {
+        printf("QueryServiceConfig failed (%d)", GetLastError());
+        CloseServiceHandle(hService);
+        CloseServiceHandle(hSCManager);
+    }
+
+    //memory is now properly allocated and this is expected to work now 
+   /* if (!QueryServiceConfig2(
+        hService,
+        SERVICE_CONFIG_DESCRIPTION,
+        NULL,
+        0,
+        &dwBytesNeeded))
+    {
+        dwError = GetLastError();
+        if (ERROR_INSUFFICIENT_BUFFER == dwError)
+        {
+            cbBufSize = dwBytesNeeded;
+            lpsd = (LPSERVICE_FAILURE_ACTIONS)LocalAlloc(LMEM_FIXED, cbBufSize);
+        }
+        else
+        {
+            printf("QueryServiceConfig2 failed (%d)", dwError);
+            CloseServiceHandle(hService);
+            CloseServiceHandle(hSCManager);
+        }
+    }
+
+    if (!QueryServiceConfig2(
+        hService,
+        SERVICE_CONFIG_DESCRIPTION,
+        (LPBYTE)lpsd,
+        cbBufSize,
+        &dwBytesNeeded))
+    {
+        printf("QueryServiceConfig2 failed (%d)", GetLastError());
+        CloseServiceHandle(hService);
+        CloseServiceHandle(hSCManager);
+    }
+*/
+/*Further Actions: typical next steps would involve inspecting the
+lpsd structure to read or modify the service's failure actions (like restart on failure, run a program, etc.),
+and possibly calling ChangeServiceConfig2 if modifications are needed. Finally, it would involve cleaning
+up allocated resources and closing any open handles.*/
+
+// need to store findings from earlier into new ones
+
+//10 arguments, but only need type, start, error
+// don't need others because should be able to plug it in bc it is string
+/*/*typedef struct _SERVICE_FAILURE_ACTIONSA {
+DWORD     dwResetPeriod;
+LPSTR     lpRebootMsg;
+LPSTR     lpCommand;
+DWORD     cActions;
+SC_ACTION *lpsaActions;
+} SERVICE_FAILURE_ACTIONSA, *LPSERVICE_FAILURE_ACTIONSA;*/
+
+//restoring variables like config 
+
+    DWORD ResetPeriod = lpsd->dwResetPeriod;
+    LPWSTR RebootMsg = lpsd->lpRebootMsg;
+    LPWSTR FAcommand = lpsd->lpCommand;
+    DWORD FActions = lpsd->cActions;
+
+    SERVICE_FAILURE_ACTIONS sfa;
+    sfa.lpsaActions = lpsd->lpsaActions;
+
+    CloseServiceHandle(hService);
+
+    /*Further Actions: typical next steps would involve inspecting the
+    lpsd structure to read or modify the service's failure actions (like restart on failure, run a program, etc.),
+    and possibly calling ChangeServiceConfig2 if modifications are needed. Finally, it would involve cleaning
+    up allocated resources and closing any open handles.*/
+
+    wchar_t wtext[256];
+    size_t outSize;
+
+    wchar_t wtext1[256];
+    size_t outSize1;
+
+    //reset
+    //length of period (in seconds) with no failures after which failure count reset to 0
+    if (strlen(reset) != 0) // This checks if the string reset is not empty. strlen returns the length of the string excluding the null terminator. If the length is not zero, it means reset contains some characters.
+    {
+        sscanf_s(reset, "%d", &ResetPeriod, sizeof(ResetPeriod));
+        //read an integer value from the string reset. 
+    }
+    //This assigns the value stored in ResetPeriod to the dwResetPeriod member of the sfa structure
+    sfa.dwResetPeriod = ResetPeriod;
+
+    //reboot
+    //this is a message broadcast... whatever i type into command line is what gets submitted 
+    if (strlen(reboot) != 0)
+    {
+        mbstowcs_s(&outSize, wtext, strlen(reboot) + 1, reboot, strlen(reboot));
+        RebootMsg = wtext;
+    }
+    sfa.lpRebootMsg = RebootMsg;
+
+    //command
+    if (strlen(command) != 0)
+    {
+        mbstowcs_s(&outSize1, wtext1, strlen(command) + 1, command, strlen(command));
+        FAcommand = wtext1;
+    }
+    sfa.lpCommand = FAcommand;
+
+    //actions
+        //separate through forward slash
+        // Valid actions are run, restart, and reboot.
+        //Use actions= "" to take no action a service fails. Note that this parameter requires the reset= parameter.
+        //the SC_ACTION_TYPE enumeration type.
+        //SC_ACTION_NONE -No action.
+        //SC_ACTION_REBOOT - Reboot the computer.
+        //SC_ACTION_RESTART - Restart the service.
+        //SC_ACTION_RUN_COMMAND - Run a command.
+
+    if (strlen(action) != 0)
+    {
+        SC_ACTION_TYPE actions[6]; // Maximum of 6 actions
+        DWORD delayt[6];
+        const int maxActions = sizeof(actions) / sizeof(actions[0]);
+        char* Iter_Action; //iterate through each action item
+        // used in a loop to iteratively extract all tokens from the original string. 
+        // After the first call, strtok_s should be called with the first argument set to action to signal that next command should continue on the same string:
+        char actionCopy[256]; // Ensure this is large enough for your input string
+        strncpy_s(actionCopy, sizeof(actionCopy), action, _TRUNCATE);
+
+        char* CommACTION = strtok_s(actionCopy, "/", &Iter_Action);
+        int actionCount = 0;
+
+        while (CommACTION != NULL && actionCount < maxActions)
+        {
+            printf("%s =", CommACTION, &Iter_Action);
+            if (strcmp(CommACTION, "run") == 0) {
+                actions[actionCount] = SC_ACTION_RUN_COMMAND;
+            }
+            else if (strcmp(CommACTION, "restart") == 0) {
+                actions[actionCount] = SC_ACTION_RESTART;
+            }
+            else if (strcmp(CommACTION, "reboot") == 0) {
+                actions[actionCount] = SC_ACTION_REBOOT;
+            }
+            else if (strcmp(CommACTION, "none") == 0) {
+                actions[actionCount] = SC_ACTION_NONE;
+            }
+
+            CommACTION = strtok_s(NULL, "/", &Iter_Action); // Move to delay value
+            if (CommACTION != NULL)
+            {
+                printf(" %s\n", CommACTION);
+                delayt[actionCount] = atoi(CommACTION);
+                CommACTION = strtok_s(NULL, "/", &Iter_Action);
+
+                actionCount = actionCount + 1;
+            }
+            //CommACTION = strtok_s(NULL, "/", &Iter_Action); // Move to the next action type
+        }
+
+
+
+        // At this point, `actions` array is populated with up to 6 actions and their delays.
+        // You can now use this information to configure service failure actions as needed.
+        // Example of printing the actions for verification:
+
+        if (actionCount != 0)
+        {
+            FActions = actionCount;
+            SC_ACTION failActions[3];
+            for (int j = 0; j < actionCount; j++)
+            {
+                failActions[j].Type = actions[j];
+                failActions[j].Delay = delayt[j];
+            }
+            sfa.lpsaActions = failActions;
+        }
+
+    }
+    sfa.cActions = FActions;
+
+    //https://learn.microsoft.com/en-us/windows/win32/api/winsvc/nf-winsvc-queryserviceconfig2a
+    //QueryServiceConfig2 has failure characters 
+    //changeserviceConfig
+    //https://learn.microsoft.com/en-us/windows/win32/api/winsvc/nf-winsvc-changeserviceconfig2a
+
+// Get a handle to the service.
+
+    hService = OpenService(
+        hSCManager,            // SCM database 
+        NameOfService,               // name of service 
+        SERVICE_CHANGE_CONFIG);  // need change config access 
+
+    if (hService == NULL)
+    {
+        printf("OpenService failed (%d)\n", GetLastError());
+        CloseServiceHandle(hSCManager);
+        return;
+    }
+
+    // Update the failure configuration
+
+    if (!ChangeServiceConfig2(
+        hService,                 // handle to service
+        SERVICE_CONFIG_FAILURE_ACTIONS, // change: failure
+        &sfa))                      // new description
+    {
+        printf("ChangeServiceConfig2 failed\n");
+    }
+    else printf("Service description updated successfully.\n");
+
+    CloseServiceHandle(hService);
+    CloseServiceHandle(hSCManager);
+
+}
+
+int main(int argc, char* argv[])
+{
+    wchar_t wtext[100];//Name of Service is a LPCWSTR so need to convert the string 
+    size_t outSize;
+    int i = 0;
+
+    if (strcmp(argv[1], "scfailure") == 0)
+    {
+
+        if (argc <= 3)
+        {
+            //return if insufficient parameters
+            FailureCall();
+            return 1;
+        }
+
+        mbstowcs_s(&outSize, wtext, strlen(argv[2]) + 1, argv[2], strlen(argv[2]));
+        NameOfService = wtext;
+
+        //set different flags
+        for (i = 3; i < argc; i = i + 2)
+        {
+            if (strcmp(argv[i], "reset=") == 0)
+            {
+                strcpy_s(reset, sizeof(reset), argv[i + 1]);
+            }
+            else if (strcmp(argv[i], "reboot=") == 0)
+            {
+                strcpy_s(reboot, sizeof(reboot), argv[i + 1]);
+            }
+            else if (strcmp(argv[i], "command=") == 0)
+            {
+                strcpy_s(command, sizeof(command), argv[i + 1]);
+            }
+            else if (strcmp(argv[i], "actions=") == 0)
+            {
+                strcpy_s(action, sizeof(action), argv[i + 1]);
+            }
+        }
+        scFAIL();
+
+
+        return 0;
+    }
+
+    return 0;
+}
