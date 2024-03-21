@@ -1,8 +1,6 @@
 #include <stdio.h>
 #include <Windows.h>
 #include <winsvc.h> //scm database handle ....
-#include <iostream>
-#include <string>
 #include <tchar.h>
 //#include <vector>
 
@@ -781,8 +779,8 @@ void __stdcall scqueryENUMERATE()
     BOOL status = EnumServicesStatusEx(
         hSCManager,
         SC_ENUM_PROCESS_INFO,
-        SERVICE_WIN32,
-        SERVICE_ACTIVE,
+        dwServiceType,
+        dwServiceState,
         NULL,
         0,
         &bytesNeeded,
@@ -804,8 +802,8 @@ void __stdcall scqueryENUMERATE()
     status = EnumServicesStatusEx(
         hSCManager,
         SC_ENUM_PROCESS_INFO,
-        SERVICE_WIN32,
-        SERVICE_ACTIVE,
+        dwServiceType,
+        dwServiceState,
         lpBytes,
         bytesNeeded,
         &bytesNeeded,
