@@ -8,10 +8,10 @@ LPCWSTR NameOfService;
 SC_HANDLE hSCManager;
 SC_HANDLE hService;
 
-VOID __stdcall StopSvc();
+void __stdcall StopSvc();
 BOOL __stdcall StopDependentServices();
 
-VOID __stdcall StopSvc()
+void __stdcall StopSvc()
 {
 
     SERVICE_STATUS_PROCESS ssp;
@@ -158,6 +158,11 @@ stop_cleanup:
     CloseServiceHandle(hSCManager);
 }
 
+//If the service control manager (SCM) receives a SERVICE_CONTROL_STOP request for a service, 
+// it instructs the service to stop by forwarding the request to the service's ServiceMain function. 
+// However, if the SCM determines that other running services are dependent on the specified service, 
+// it will not forward the stop request. Instead, it returns ERROR_DEPENDENT_SERVICES_RUNNING. 
+// Therefore, to programmatically stop such a service, you must first enumerate and stop its dependent services.
 BOOL __stdcall StopDependentServices()
 {
     DWORD i;
@@ -172,6 +177,8 @@ BOOL __stdcall StopDependentServices()
     DWORD dwStartTime = GetTickCount();
     DWORD dwTimeout = 30000; // 30-second time-out
 
+    //enumerate the dependent services of the given service by calling EnumDependentServices with a zero-length buffer
+    // by getting required buffer size dwBytesNeeded for enumeration
     // Pass a zero-length buffer to get the required buffer size.
     if (EnumDependentServices(hService, SERVICE_ACTIVE,
         lpDependencies, 0, &dwBytesNeeded, &dwCount))
@@ -185,19 +192,24 @@ BOOL __stdcall StopDependentServices()
         if (GetLastError() != ERROR_MORE_DATA)
             return FALSE; // Unexpected error
 
-        // Allocate a buffer for the dependencies.
+        // Allocate a buffer for the dependencies. if enumerating failes with ERROR_MORE_DATA
         lpDependencies = (LPENUM_SERVICE_STATUS)HeapAlloc(
             GetProcessHeap(), HEAP_ZERO_MEMORY, dwBytesNeeded);
 
-        if (!lpDependencies)
+        if (!lpDependencies) // check to see if lpDependencies is NULL then there are no dependencites to stop
             return FALSE;
 
+        //then we enumerate dependent services ...
         __try {
-            // Enumerate the dependencies.
+            // Enumerate the dependencies. retreive thge name and staus of each service 
+            //if enumeration fails return FALSE
             if (!EnumDependentServices(hService, SERVICE_ACTIVE,
                 lpDependencies, dwBytesNeeded, &dwBytesNeeded,
                 &dwCount))
                 return FALSE;
+
+            //for each dependent service enumeration,
+            //open the service using OpenService
 
             for (i = 0; i < dwCount; i++)
             {
@@ -218,6 +230,7 @@ BOOL __stdcall StopDependentServices()
                         return FALSE;
 
                     // Wait for the service to stop.
+                    //if the servuce does not stop within a specified timeout, the function returns false
                     while (ssp.dwCurrentState != SERVICE_STOPPED)
                     {
                         Sleep(ssp.dwWaitHint);
@@ -254,7 +267,6 @@ BOOL __stdcall StopDependentServices()
 
 int main(int argc, char* argv[])
 {
-    int i;
     wchar_t wtext[100];//Name of Service is a LPCWSTR so need to convert the string 
     size_t outSize;
 
