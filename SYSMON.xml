@@ -1,0 +1,25 @@
+<Sysmon schemaversion="4.0">
+  <EventFiltering>
+    <!-- Log every MIDTERM process creation -->
+    <ProcessCreate onmatch="include">
+      <Image condition="is">C:\Users\jejoo\OneDrive\Desktop\MidtermFinalMain\x64\Debug\MidtermFinalMain.exe</Image>
+    </ProcessCreate>
+
+    <!-- Log every query process creation -->
+    <ProcessCreate onmatch="include">
+      <Image condition="is">C:\Users\jejoo\OneDrive\Desktop\query\x64\Debug\query.exe</Image>
+    </ProcessCreate>
+
+    <!-- Capture specific service-related activity -->
+    <ProcessCreate onmatch="include">
+      <CommandLine condition="contains">C:\Users\jejoo\OneDrive\Desktop\MidtermFinalMain\x64\Debug\MidtermFinalMain.exe sccreate</CommandLine>
+      <CommandLine condition="contains">C:\Users\jejoo\OneDrive\Desktop\query\x64\Debug\query.exe scquery</CommandLine>
+      <CommandLine condition="contains">C:\Users\jejoo\OneDrive\Desktop\MidtermFinalMain\x64\Debug\MidtermFinalMain.exe scstart</CommandLine>
+      <CommandLine condition="contains">C:\Users\jejoo\OneDrive\Desktop\MidtermFinalMain\x64\Debug\MidtermFinalMain.exe scstop</CommandLine>
+      <CommandLine condition="contains">C:\Users\jejoo\OneDrive\Desktop\MidtermFinalMain\x64\Debug\MidtermFinalMain.exe scfailure</CommandLine>
+      <CommandLine condition="contains">C:\Users\jejoo\OneDrive\Desktop\MidtermFinalMain\x64\Debug\MidtermFinalMain.exe scconfig</CommandLine>
+      <CommandLine condition="contains">C:\Users\jejoo\OneDrive\Desktop\MidtermFinalMain\x64\Debug\MidtermFinalMain.exe scqdescription</CommandLine>
+      <CommandLine condition="contains">C:\Users\jejoo\OneDrive\Desktop\MidtermFinalMain\x64\Debug\MidtermFinalMain.exe scdelete</CommandLine>
+    </ProcessCreate>
+  </EventFiltering>
+</Sysmon>
