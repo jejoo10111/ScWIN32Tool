@@ -8,6 +8,9 @@ This is a C++ build of a native Windows Tool, sc.exe (service control) , using w
 
 A note will be written here: this build has a few difficulties connecting to certain services due to access issues and have been noted in the execution of the process. Additionally, when this project was started, it was tackled one switch at a time. As a result, one large source.cpp script was created combining all the switches together. However, in the process of combining my **scquery.cpp** switch was not transferred accordingly. Therefore, a separate **query.exe** is published onto this GitHub to be executed separately.
 
+## Sysmon monitoring 
+The SYSMON.xml is a sysmon configuration file to monitor the commands for the executables query.exe and scWin32.exe. If this configuration file is going to be used for your own monitoring, change the location of you the executable for the processes and the commands!!
+
 ## Updates for the Future
 There are a few updates that need to be made to this tool for it to function appropriately and efficiently: 
 
