@@ -1,12 +1,10 @@
 #pragma once
 #include <stdio.h>
-#include <iostream>
 #include <Windows.h>
 #include <winsvc.h> //scm database handle .... create a service
-#include <string>
 
 //global variables
-TCHAR NameOfService[256];
+TCHAR NameOfService[256]; //ichanged this from TCHAR to LPCWSTR if something stops working!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 TCHAR displayName[256];
 TCHAR BinaryPathName[256];
 
@@ -145,9 +143,9 @@ void __stdcall sccreate()
        BinaryPathName,             //binary path name
        group,                      //no load ordering group
        NULL,                        //no tag identifier... not widely used and not documented... only for specific applications
-       depend,                     // no dependencies
+       depend,                     //  dependencies
        NULL,                       //localsystem account
-       password                    //no password
+       password                    // password
        );
 
 
