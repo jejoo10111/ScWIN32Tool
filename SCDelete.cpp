@@ -7,10 +7,10 @@ LPCWSTR NameOfService;
 SC_HANDLE hSCManager;
 SC_HANDLE hService;
 
-VOID __stdcall DeleteSvc();
+void __stdcall DeleteSvc();
 
 //https://learn.microsoft.com/en-us/windows/win32/services/svcconfig-cpp
-VOID __stdcall DeleteSvc()
+void __stdcall DeleteSvc()
 {
     
     SERVICE_STATUS ssStatus;
