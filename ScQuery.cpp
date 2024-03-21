@@ -1,12 +1,9 @@
 
 #pragma once
 #include <stdio.h>
-#include <iostream>
 #include <Windows.h>
 #include <winsvc.h> //scm database handle .... create a service
-#include <strsafe.h>
-#include <tchar.h>
-#include <vector>
+#include <tchar.h> //compile same code for bth ANSI and univode character sets without changing 
 
 //https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2012-r2-and-2012/dd228922(v=ws.11)
 
@@ -33,7 +30,6 @@ CHAR group[256] = "";
 
 void __stdcall scqueryService();
 void __stdcall scqueryENUMERATE();
-void QueryCall();
 
 void QueryCall()
 {
@@ -41,7 +37,6 @@ void QueryCall()
     printf("\ttype=     Type of services to enumerate (driver, service, userservice, all)\n\t\t(default = services)\n");
     printf("\tstart=    State of services to enumerate (inactive, all)\n\t\t(default = active)\n");
     printf("\tgroup=    Service group to enumerate\n\t\t(default = all groups)\n");
-    printf("\tbufsize=      Service group to enumerate\n\t\(tdefault = 4096\n");
 
 }
 
@@ -111,7 +106,6 @@ void __stdcall scqueryService()
     _tprintf(TEXT("\nSERVICE_NAME: %s    \n"), NameOfService);
     printf("  TYPE: %x\n", ssp.dwServiceType);
     printf("  STATE: %d\n", ssp.dwCurrentState);
-    //printf("   %x\n", ssp.dwControlsAccepted);
     printf("  WIN32_EXIT_CODE: %d\n", ssp.dwWin32ExitCode);
     printf("  SERVICE_EXIT_CODE: %d\n", ssp.dwServiceSpecificExitCode);
     printf("  ChHECKPOINT: %d\n", ssp.dwCheckPoint);
@@ -287,6 +281,7 @@ int main(int argc, char* argv[])
 
     if (strcmp(argv[1], "scquery") == 0)
     {
+
         if (argc == 2)
         {
             //query entire local database of services
