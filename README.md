@@ -31,7 +31,7 @@ Open an Administrative Command Prompt and either navigate to the location of the
 
 ## Features
 
-The features in this tool are discussed below. An example to utilize the command for these switches are also provided.
+The features in this tool are discussed below. An example to utilize the command for these switches are also provided. Whitespace is needed after each switch after the "=" sign.
 commands can be written as : [Name of Executable] [command]
 
 ### Start
@@ -40,37 +40,69 @@ The start command starts a service. The command can be written as
 
 scWin32.exe scstart [Service Name]
 
+scWin32.exe scstart GamesAppService
+
 ### Stop
 
 The stop command sends a STOP control request to a service; stops the service from running.
 
 scWin32.exe scstop [Service Name]
 
+scWin32.exe scstop GamesAppService
+
 ### Failure
 
 The failure command specifies one or more actions to be taken if a particular service fails.
 
 scWin32.exe scfailure [Service Name] <option1><option2><option3>
+[reset= <ErrorFreePeriod>] [reboot= <BroadcastMessage>] [command= <CommandLine>] [actions= {"" | {[run/<MS>] | [restart/<MS>] | [reboot/<MS>]}[/...]]
+
+scWin32.exe scfailure SimpleService reset= 3600 reboot= "MyService crashed -- rebooting machine" actions= reboot/30000
 
 ### Create
 
 The create command creates a subkey and entries for the service in the registry and in the service control manager database.
 
+type= <own | share | interact | kernel | filesys | rec type= {own | share}> (default = own)
+start= <boot | system | auto | demand | disabled | delayed - auto> (default = demand)
+error= <normal | severe | critical | ignore> (default = normal)
+binPath= <BinaryPathName to the.exe file> group= <LoadOrderGroup>
+tag= <yes | no>
+depend= <Dependencies(separated by / (forward slash))>
+obj= <AccountName | ObjectName> (default = LocalSystem)
+DisplayName= <display name>
+password= <password>
+
 scWin32.exe sccreate [Service Name] binpath= "" type= "" start= "" ...
 
+scWin32.exe sccreate SimpleService binpath= "C:\path\to\your\service.exe"
 
 ### Config
 
 The config command modifies the value of a service's entries in the registry and in the service control manager database.
 
+type= <own | share | interact | kernel | filesys | rec type= {own | share}> (default = own)
+start= <boot | system | auto | demand | disabled | delayed - auto> (default = demand)
+error= <normal | severe | critical | ignore> (default = normal)
+binPath= <BinaryPathName to the.exe file> group= <LoadOrderGroup>
+tag= <yes | no>
+depend= <Dependencies(separated by / (forward slash))>
+obj= <AccountName | ObjectName> (default = LocalSystem)
+DisplayName= <display name>
+password= <password>
+
 scWin32.exe scconfig [Service Name] binpath= "" type= "" start= "" ...
+
+scWin32.exe scconfig SimpleService type= share
 
 ### Query
 
 The query command obtains and displays information about the specified service, driver, type of service, or type of driver.
 
 scWin32.exe scquery [Service Name] 
-scWin32.exe scquery
+
+scWin32.exe scquery SimpleService
+scWin32.exe 
 
 ### Qdescription
 
@@ -78,16 +110,41 @@ The qdescription command displays a service's description string.
 
 scWin32.exe scqdescription [Service Name] 
 
+scWin32.exe scqdescription SimpleService
+
 ### Delete
 
 The delete command deletes a service subkey from the registry.
 
 scWin32.exe scdelete [Service Name] 
 
-6. Include Credits
-If you worked on the project as a team or an organization, list your collaborators/team members. You should also include links to their GitHub profiles and social media too.
+scWin32.exe scdelete SimpleService
 
-Also, if you followed tutorials or referenced a certain material that might help the user to build that particular project, include links to those here as well.
+## Credits
 
-This is just a way to show your appreciation and also to help others get a first hand copy of the project.
+This project was assigned to me by Gordon Long at George Mason University for my Digital Forensics class. 
+
+### References
+Here are a list of resources that I have used that have assisted me in the creation of this project:
+1. https://learn.microsoft.com/en-us/previous-versions/windows/it-pro/windows-server-2012-r2-and-2012/cc742126(v=ws.11)
+2. https://learn.microsoft.com/en-us/windows/win32/services/starting-a-service
+3. https://github.com/MicrosoftDocs/win32/blob/docs/desktop-src/Services/stopping-a-service.md
+4. https://microsoft.github.io/windows-docs-rs/doc/windows/Win32/System/Services/struct.SERVICE_FAILURE_ACTIONSW.html
+5. https://learn.microsoft.com/en-us/windows/win32/api/winsvc/ns-winsvc-service_failure_actionsa
+6. https://learn.microsoft.com/en-us/windows/win32/api/winsvc/nf-winsvc-queryserviceconfig2a
+7. https://learn.microsoft.com/en-us/windows/win32/api/winsvc/nf-winsvc-changeserviceconfig2a
+8. https://forums.codeguru.com/showthread.php?504620-OpenService-returns-Null-but-GetLastError-also-returns-Null
+9. https://github.com/nixonion/sc/blob/master/sc/Source.cpp#L46
+10. https://learn.microsoft.com/en-us/windows/win32/api/winsvc/nf-winsvc-createservicea
+11. https://learn.microsoft.com/en-us/windows/win32/services/service-security-and-access-rights
+12. https://learn.microsoft.com/en-us/windows/win32/api/winsvc/nf-winsvc-createservicew
+13. https://learn.microsoft.com/en-us/windows/win32/services/installing-a-service
+14. https://learn.microsoft.com/en-us/windows/win32/api/winsvc/nf-winsvc-openscmanagera
+15. https://learn.microsoft.com/en-us/cpp/cpp/main-function-command-line-args?view=msvc-170
+16. https://learn.microsoft.com/en-us/windows/win32/api/winsvc/nf-winsvc-enumservicesstatusa
+17. https://learn.microsoft.com/en-us/windows/win32/api/winsvc/ns-winsvc-service_status
+18. https://learn.microsoft.com/en-us/windows/win32/api/winsvc/nf-winsvc-queryservicestatusex
+19. https://learn.microsoft.com/en-us/windows/win32/services/querying-a-service-s-configuration
+20. https://learn.microsoft.com/en-us/windows/win32/services/svcconfig-cpp
+
 
