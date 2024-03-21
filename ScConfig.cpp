@@ -1,9 +1,8 @@
 #pragma once
 #include <stdio.h>
-#include <iostream>
 #include <Windows.h>
 #include <winsvc.h> //scm database handle .... create a service
-#include <string>
+
 
 //https://github.com/MicrosoftDocs/win32/blob/docs/desktop-src/Services/changing-a-service-configuration.md
 
@@ -334,7 +333,6 @@ int main(int argc, char* argv[]) //takes in command line input // argccontains c
 
             for (i = 3; i < argc; i = i + 2)
             {
-                printf("FOR LOOP");
                 //options  A space is required between the equal sign and the value. argv[i+1]
                 //type = <own | share | interact | kernel | filesys | rec | userown | usershare> (default = own)
 
