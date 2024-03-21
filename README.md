@@ -38,26 +38,26 @@ commands can be written as : [Name of Executable] [command]
 
 The start command starts a service. The command can be written as 
 
-scWin32.exe scstart [Service Name]
+MidtermFinalMain.exe scstart [Service Name]
 
-scWin32.exe scstart GamesAppService
+MidtermFinalMain.exe scstart GamesAppService
 
 ### Stop
 
 The stop command sends a STOP control request to a service; stops the service from running.
 
-scWin32.exe scstop [Service Name]
+MidtermFinalMain.exe scstop [Service Name]
 
-scWin32.exe scstop GamesAppService
+MidtermFinalMain.exe scstop GamesAppService
 
 ### Failure
 
 The failure command specifies one or more actions to be taken if a particular service fails.
 
-scWin32.exe scfailure [Service Name] <option1><option2><option3>
+MidtermFinalMain.exe scfailure [Service Name] <option1><option2><option3>
 [reset= <ErrorFreePeriod>] [reboot= <BroadcastMessage>] [command= <CommandLine>] [actions= {"" | {[run/<MS>] | [restart/<MS>] | [reboot/<MS>]}[/...]]
 
-scWin32.exe scfailure SimpleService reset= 3600 reboot= "MyService crashed -- rebooting machine" actions= reboot/30000
+MidtermFinalMain.exe scfailure SimpleService reset= 3600 reboot= "MyService crashed -- rebooting machine" actions= reboot/30000
 
 ### Create
 
@@ -73,9 +73,9 @@ obj= <AccountName | ObjectName> (default = LocalSystem)
 DisplayName= <display name>
 password= <password>
 
-scWin32.exe sccreate [Service Name] binpath= "" type= "" start= "" ...
+MidtermFinalMain.exe sccreate [Service Name] binpath= "" type= "" start= "" ...
 
-scWin32.exe sccreate SimpleService binpath= "C:\path\to\your\service.exe"
+MidtermFinalMain.exe sccreate SimpleService binpath= "C:\path\to\your\service.exe"
 
 ### Config
 
@@ -91,34 +91,34 @@ obj= <AccountName | ObjectName> (default = LocalSystem)
 DisplayName= <display name>
 password= <password>
 
-scWin32.exe scconfig [Service Name] binpath= "" type= "" start= "" ...
+MidtermFinalMain.exe scconfig [Service Name] binpath= "" type= "" start= "" ...
 
-scWin32.exe scconfig SimpleService type= share
+MidtermFinalMain.exe scconfig SimpleService type= share
 
 ### Query
 
 The query command obtains and displays information about the specified service, driver, type of service, or type of driver.
 
-scWin32.exe scquery [Service Name] 
+MidtermFinalMain.exe scquery [Service Name] 
 
-scWin32.exe scquery SimpleService
-scWin32.exe 
+MidtermFinalMain.exe scquery SimpleService
+MidtermFinalMain.exe scquery 
 
 ### Qdescription
 
 The qdescription command displays a service's description string.
 
-scWin32.exe scqdescription [Service Name] 
+MidtermFinalMain.exe scqdescription [Service Name] 
 
-scWin32.exe scqdescription SimpleService
+MidtermFinalMain.exe scqdescription SimpleService
 
 ### Delete
 
 The delete command deletes a service subkey from the registry.
 
-scWin32.exe scdelete [Service Name] 
+MidtermFinalMain.exe scdelete [Service Name] 
 
-scWin32.exe scdelete SimpleService
+MidtermFinalMain.exe scdelete SimpleService
 
 ## Credits
 
