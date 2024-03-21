@@ -2,7 +2,6 @@
 #include <stdio.h>
 #include <Windows.h>
 #include <winsvc.h> //scm database handle ....
-#include <wchar.h>
 #include <tchar.h>
 
 //https://learn.microsoft.com/en-us/windows/win32/services/svcconfig-cpp
